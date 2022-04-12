@@ -1,6 +1,7 @@
 import fs from "fs"
 import dbConnect from "helpers/db/dbConnect";
 import Users from "../../models/User";
+import bcrypt from "bcryptjs"
 
 
 // users in JSON file for simplicity, store in a db for production applications
