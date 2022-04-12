@@ -1,4 +1,7 @@
-const fs = require('fs');
+import fs from "fs"
+import dbConnect from "helpers/db/dbConnect";
+import Users from "../../models/User";
+
 
 // users in JSON file for simplicity, store in a db for production applications
 let users = require('data/users.json');
@@ -12,17 +15,30 @@ export const usersRepo = {
     delete: _delete
 };
 
-function create(user) {
-    // generate new user id
-    user.id = users.length ? Math.max(...users.map(x => x.id)) + 1 : 1;
+async function create(req,res) {
+  
+    try {
+        await dbConnect();
+        const { password,name } = req.body;
 
-    // set date created and updated
-    user.dateCreated = new Date().toISOString();
-    user.dateUpdated = new Date().toISOString();
+        const errMsg = valid(name, email, password, cf_password)
+        if(errMsg) return res.status(400).json({err: errMsg})
 
-    // add and save user
-    users.push(user);
-    saveData();
+        const existingUser = await Users.findOne({ email })
+        if(existingUser) return res.status(400).json({err: 'This email already exists.'})
+
+        const passwordHash = await bcrypt.hash(password, 12)
+
+        const newUser = new Users({ 
+            name,  password: passwordHash
+        })
+
+        await newUser.save()
+        res.json({msg: "Register Success!"})
+
+    }catch(err){
+        return res.status(500).json({err: err.message})
+    }
 }
 
 function update(id, params) {
