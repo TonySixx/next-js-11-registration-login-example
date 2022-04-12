@@ -22,8 +22,6 @@ async function create(req,res) {
         await dbConnect();
         const { password,name } = req.body;
 
-        const errMsg = valid(name, email, password, cf_password)
-        if(errMsg) return res.status(400).json({err: errMsg})
 
         const existingUser = await Users.findOne({ email })
         if(existingUser) return res.status(400).json({err: 'This email already exists.'})
